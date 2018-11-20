@@ -8,9 +8,13 @@ class Logger
 
     static function log($message, $logLevel = self::LOG_LEVEL_DEBUG)
     {
+        if ( ! defined('STDOUT')) {
+            define('STDOUT', fopen('php://stdout', 'w'));
+        }
+        
         if (is_array($message)) {
             $message = json_encode($message);
         }
-        fwrite(STDOUT, date('Y-m-d H:i:s').' -> '.$message."\n");
+        fwrite(STDOUT, date('Y-m-d H:i:s') . ' -> ' . $message . "\n");
     }
 }
