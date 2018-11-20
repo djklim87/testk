@@ -18,7 +18,14 @@ class ManticoreHandler
         $this->producer    = $producer;
         $this->consumer    = $consumer;
         $this->config      = $config;
-        $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' . $this->config['manticore']['port']);
+
+
+        try {
+            $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' . $this->config['manticore']['port']);
+        } catch (PDOException $e) {
+
+            die("Handler class: Manticore connection error: " . $e->getMessage()."\n");
+        }
     }
 
 
@@ -27,9 +34,9 @@ class ManticoreHandler
      */
     public function handleTopics()
     {
-
+        Logger::log('Handler class: get messages');
         $consumer = $this->consumer->subscribe($this->config['consumer']['topic'])->getConsumer();
-
+        Logger::log('Handler class: get messages complete');
         while (true) {
             $message = $consumer->consume(120*1000);
 
@@ -56,7 +63,10 @@ class ManticoreHandler
                 $final[] = $row;
             }
 
+            Logger::log('Handler class: send message');
+            Logger::log($final);
             $this->producer->send($this->config['producer']['topic'], json_encode($final));
+            Logger::log('Handler class: send message complete');
         }
     }
 }

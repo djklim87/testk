@@ -6,8 +6,10 @@ class KafkaConsumer
 
     public function __construct($config)
     {
+        Logger::log('Consumer class: rdkafka conf init');
         $conf = new RdKafka\Conf();
 
+        Logger::log('Consumer class: start rebalance');
         // Set a rebalance callback to log partition assignments (optional)
         $conf->setRebalanceCb(function (RdKafka\KafkaConsumer $kafka, $err, array $partitions = null) {
             switch ($err) {
@@ -27,6 +29,7 @@ class KafkaConsumer
                     throw new \Exception($err);
             }
         });
+        Logger::log('Consumer class: end rebalance');
 
         // Configure the group.id. All consumer with the same group.id will consume
         // different partitions.
@@ -35,6 +38,7 @@ class KafkaConsumer
         // Initial list of Kafka brokers
         $conf->set('metadata.broker.list', 'kafka');
 
+        Logger::log('Consumer class: init topic conf');
         $topicConf = new RdKafka\TopicConf();
 
         // Set where to start consuming messages when there is no initial offset in
@@ -45,11 +49,14 @@ class KafkaConsumer
         // Set the configuration to use for subscribed/assigned topics
         $conf->setDefaultTopicConf($topicConf);
 
+        Logger::log('Consumer class: rdkafka init');
         $this->consumer = new RdKafka\KafkaConsumer($conf);
+        Logger::log('Consumer class: rdkafka init complete');
 
     }
 
     public function subscribe($topic){
+        Logger::log('Consumer class: subscribe to topic');
         $this->consumer->subscribe([$topic]);
         return $this;
     }
