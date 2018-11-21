@@ -11,7 +11,7 @@ class Logger
         if ( ! defined('STDOUT')) {
             define('STDOUT', fopen('php://stdout', 'w'));
         }
-        
+
         if (is_array($message)) {
             $message = json_encode($message);
         }

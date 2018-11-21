@@ -3,22 +3,21 @@
 
 class ManticoreHandler
 {
-    /** @var KafkaProducer */
-    private $producer;
     /** @var KafkaConsumer */
     private $consumer;
     /** @var array */
     private $config;
     /** @var PDO  */
     private $manticoreQL;
+    /** @var Sender */
+    private $sender;
 
 
-    public function __construct(KafkaConsumer $consumer, KafkaProducer $producer, $config)
+    public function __construct(KafkaConsumer $consumer, Sender $sender, $config)
     {
-        $this->producer    = $producer;
         $this->consumer    = $consumer;
         $this->config      = $config;
-
+        $this->sender      = $sender;
 
         try {
             $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' . $this->config['manticore']['port']);
@@ -65,7 +64,8 @@ class ManticoreHandler
 
             Logger::log('Handler class: send message');
             Logger::log($final);
-            $this->producer->send($this->config['producer']['topic'], json_encode($final));
+
+            $this->sender->send($this->config['producer']['topic'], json_encode($final));
             Logger::log('Handler class: send message complete');
         }
     }
