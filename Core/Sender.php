@@ -3,7 +3,7 @@
 class Sender{
     private $producersUrl = [];
 
-    public function __construct($producersUrl = ['http://producer:80'])
+    public function __construct($producersUrl = ['http://producer'])
     {
         $this->producersUrl = $producersUrl;
     }
