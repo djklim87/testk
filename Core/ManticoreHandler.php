@@ -68,5 +68,6 @@ class ManticoreHandler
             $this->sender->send($this->config['producer']['topic'], json_encode($final));
             Logger::log('Handler class: send message complete');
         }
+        Logger::log('Handler class: end while');
     }
 }
