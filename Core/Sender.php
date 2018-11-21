@@ -3,7 +3,7 @@
 class Sender{
     private $producersUrl = [];
 
-    public function __construct($producersUrl = ['producer'])
+    public function __construct($producersUrl = ['http://producer:80'])
     {
         $this->producersUrl = $producersUrl;
     }
@@ -47,7 +47,9 @@ class Sender{
         }
 
         foreach ($channels as $channel) {
-            //$queryResult = curl_multi_getcontent($channel);
+
+            $queryResult = curl_multi_getcontent($channel);
+            Logger::log('Sender class: message sended. Producer answer: ');
             curl_multi_remove_handle($multi, $channel);
         }
 
