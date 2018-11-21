@@ -58,15 +58,28 @@ class ManticoreHandler
             $result = $this->manticoreQL->query($query);
             $final  = [];
 
-            foreach ($result->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-                $final[] = $row;
+            if(!empty($result)){
+                foreach ($result->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+                    $final[] = $row;
+                }
+
+                if(!empty($final)){
+                    Logger::log('Handler class: send message');
+                    Logger::log($final);
+
+                    $this->sender->send($this->config['producer']['topic'], json_encode($final));
+                    Logger::log('Handler class: send message complete');
+                }else{
+                    Logger::log('Handler class: CALL PQ return empty result. Query: ');
+                    Logger::log('Handler class: Manticore connect to : '. $this->config['manticore']['host'] .
+                                ', port=' . $this->config['manticore']['port']);
+                    Logger::log('Handler class: Query: '.$query);
+                }
+
+            }else{
+                Logger::log('Handler class: CALL PQ fatal error');
             }
 
-            Logger::log('Handler class: send message');
-            Logger::log($final);
-
-            $this->sender->send($this->config['producer']['topic'], json_encode($final));
-            Logger::log('Handler class: send message complete');
         }
         Logger::log('Handler class: end while');
     }
