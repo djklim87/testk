@@ -49,7 +49,7 @@ class Sender{
         foreach ($channels as $channel) {
 
             $queryResult = curl_multi_getcontent($channel);
-            Logger::log('Sender class: message sended. Producer answer: ');
+            Logger::log('Sender class: message sended. Producer answer: '.json_encode($queryResult));
             curl_multi_remove_handle($multi, $channel);
         }
 
