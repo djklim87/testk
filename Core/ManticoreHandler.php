@@ -14,10 +14,6 @@ class ManticoreHandler
     /** @var int */
     private $lastSendTime = 0;
 
-    /** @var int Max count of CALL PQ results, what we can store before send them to producer */
-    const SEND_MAX_BATCH_SIZE = 10;
-    /** @var int Limit in seconds */
-    const SEND_MAX_BATCH_WAIT = 1;
 
     public function __construct(KafkaConsumer $consumer, $config)
     {
@@ -93,11 +89,16 @@ class ManticoreHandler
             $cnt = count($sendData);
 
             $sendBy = '';
-            if ($cnt >= self::SEND_MAX_BATCH_SIZE) {
+
+
+
+            /* send_max_batch_size - Max count of CALL PQ results, what we can store before send them to producer */
+            if ($cnt >= $this->config['consumer']['send_max_batch_size']) {
                 $sendBy = 'bach size';
             }
 
-            if ($this->lastSendTime + self::SEND_MAX_BATCH_WAIT < time()) {
+            /** send_max_batch_wait - Limit in seconds between sends to producer*/
+            if ($this->lastSendTime + $this->config['consumer']['send_max_batch_wait'] < time()) {
                 $sendBy = 'timeout';
             }
 
