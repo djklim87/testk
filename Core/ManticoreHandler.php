@@ -9,7 +9,15 @@ class ManticoreHandler
     private $config;
     /** @var PDO */
     private $manticoreQL;
+    /** @var array */
+    private $sendData = [];
+    /** @var int */
+    private $lastSendTime = 0;
 
+    /** @var int Max count of CALL PQ results, what we can store before send them to producer */
+    const SEND_MAX_BATCH_SIZE = 10;
+    /** @var int Limit in seconds */
+    const SEND_MAX_BATCH_WAIT = 1;
 
     public function __construct(KafkaConsumer $consumer, $config)
     {
@@ -66,29 +74,7 @@ class ManticoreHandler
                     Logger::log('Handler class: send message');
                     Logger::log($final);
 
-                    $ch = curl_init();
-
-                    /* TODO in future change to balancer url */
-                    curl_setopt($ch, CURLOPT_URL, 'http://producer');
-                    curl_setopt($ch, CURLOPT_POST, 1);
-
-                    curl_setopt($ch, CURLOPT_POSTFIELDS,
-                        http_build_query(
-                            [
-                                'topic'   => $this->config['producer']['topic'],
-                                'message' => json_encode($final)
-                            ]
-                        )
-                    );
-
-                    // Receive server response ...
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-                    $server_output = curl_exec($ch);
-
-                    curl_close($ch);
-
-                    Logger::log('Handler class: send message response - ' . $server_output);
+                    $sendData[] = json_encode($final);
 
                 } else {
 
@@ -103,7 +89,73 @@ class ManticoreHandler
                 Logger::log('Handler class: CALL PQ fatal error');
             }
 
+
+            $cnt = count($sendData);
+
+            $sendBy = '';
+            if ($cnt >= self::SEND_MAX_BATCH_SIZE) {
+                $sendBy = 'bach size';
+            }
+
+            if ($this->lastSendTime + self::SEND_MAX_BATCH_WAIT < time()) {
+                $sendBy = 'timeout';
+            }
+
+            if ($sendBy && ! empty($sendData)) {
+                $this->sendToProducer($sendData);
+                Logger::log('Handler class: send messages by ' . $sendBy . '. Count ' . $cnt);
+                $sendData = [];
+            }
+
         }
         Logger::log('Handler class: end while');
+    }
+
+
+    private function sendToProducer($data)
+    {
+        $curls  = [];
+        $result = [];
+
+        $mh = curl_multi_init();
+
+        foreach ($data as $id => $message) {
+
+            $curls[$id] = curl_init();
+
+            curl_setopt($curls[$id], CURLOPT_URL, 'http://producer');
+            curl_setopt($curls[$id], CURLOPT_HEADER, 0);
+            curl_setopt($curls[$id], CURLOPT_RETURNTRANSFER, 1);
+
+            curl_setopt($curls[$id], CURLOPT_POST, 1);
+
+            curl_setopt($curls[$id], CURLOPT_POSTFIELDS,
+                http_build_query(
+                    [
+                        'topic'   => $this->config['producer']['topic'],
+                        'message' => $message
+                    ]
+                )
+            );
+
+
+            curl_multi_add_handle($mh, $curls[$id]);
+        }
+
+        $running = null;
+
+        do {
+            curl_multi_exec($mh, $running);
+        } while ($running > 0);
+
+        foreach ($curls as $id => $c) {
+            $result[$id] = curl_multi_getcontent($c);
+            curl_multi_remove_handle($mh, $c);
+        }
+
+        $this->lastSendTime = time();
+        curl_multi_close($mh);
+
+        return $result;
     }
 }

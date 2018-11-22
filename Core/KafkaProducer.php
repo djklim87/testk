@@ -17,8 +17,7 @@ class KafkaProducer
         Logger::log('Producer class: subscribe topic - '.$topic);
         $topic = $this->producer->newTopic($topic);
         Logger::log('Producer class: start send message');
-        $result = $topic->produce(RD_KAFKA_PARTITION_UA, 0, $message);
-        echo 'Sended. Result: '.json_encode($result);
+        $topic->produce(RD_KAFKA_PARTITION_UA, 0, $message);
         Logger::log('Producer class: send complete');
     }
 }
