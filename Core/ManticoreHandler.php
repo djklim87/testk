@@ -61,7 +61,7 @@ class ManticoreHandler
             Logger::startTimeMeasure('get_manticore_result');
             $result = $this->manticoreQL->query($query);
             Logger::endTimeMeasure('get_manticore_result');
-            $final  = [];
+            $final = [];
 
             if ( ! empty($result)) {
 
@@ -85,11 +85,11 @@ class ManticoreHandler
                 Logger::log('Handler class: CALL PQ fatal error');
             }
 
-
-            $cnt = count($sendData);
+            if ( ! empty($sendData)) {
+                $cnt = count($sendData);
+            }
 
             $sendBy = '';
-
 
 
             /* send_max_batch_size - Max count of CALL PQ results, what we can store before send them to producer */

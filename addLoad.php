@@ -33,7 +33,6 @@ for ($i = 0; $i <= 7927; $i += 10) {
     $stmt = $pdo->query('SELECT ID, post_content FROM wp_posts LIMIT 10 OFFSET ' . $i);
     while ($row = $stmt->fetch()) {
         $producer->send('my-docs', json_encode(['id' => $row['ID'], 'text' => $row['post_content']]));
-        die();
     }
 }
 
