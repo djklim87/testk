@@ -4,6 +4,8 @@ require_once 'Core/KafkaConsumer.php';
 require_once 'Core/ManticoreHandler.php';
 require_once 'Core/Logger.php';
 
+Logger::startTimeMeasure('all_script');
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);

@@ -2,9 +2,28 @@
 
 class Logger
 {
+    public static $timeMeasures = [];
+    public static $timeInSeconds = [];
+
     const LOG_LEVEL_DEBUG = 3;
     const LOG_LEVEL_WARNING = 2;
     const LOG_LEVEL_PRODUCTION = 1;
+
+
+    static function startTimeMeasure($name){
+        self::$timeMeasures[$name] = microtime(true);
+    }
+
+    static function endTimeMeasure($name){
+        $now = microtime(true);
+        self::$timeInSeconds[$name] = $now - self::$timeMeasures[$name];
+
+        self::startTimeMeasure($name);
+    }
+
+    static function getTimeMeasureResults(){
+        return print_r(self::$timeInSeconds, true);
+    }
 
     static function log($message, $logLevel = self::LOG_LEVEL_DEBUG)
     {
