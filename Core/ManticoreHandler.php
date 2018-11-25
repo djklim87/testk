@@ -82,11 +82,13 @@ class ManticoreHandler
                 }
 
             } else {
-                Logger::log('Handler class: CALL PQ fatal error');
+                Logger::log('Handler class: CALL PQ fatal error. Manticore - ' . print_r($this->manticoreQL));
             }
 
             if ( ! empty($sendData)) {
                 $cnt = count($sendData);
+            } else {
+                $cnt = 0;
             }
 
             $sendBy = '';
