@@ -21,8 +21,8 @@ class ManticoreHandler
         $this->config   = $config;
 
         try {
-            $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' . $this->config['manticore']['port'],
-                '', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' .
+                                          $this->config['manticore']['port']);
         } catch (PDOException $e) {
 
             die("Handler class: Manticore connection error: " . $e->getMessage() . "\n");
@@ -48,7 +48,7 @@ class ManticoreHandler
             }
             json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs[] = "'" . $message->payload . "'";
+                $docs[] = "'" . str_replace("'",'\'', $message->payload) . "'";
             } else {
                 continue;
             }
