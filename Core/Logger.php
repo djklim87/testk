@@ -10,24 +10,30 @@ class Logger
     const LOG_LEVEL_PRODUCTION = 1;
 
 
-    static function startTimeMeasure($name){
+    static function startTimeMeasure($name)
+    {
         self::$timeMeasures[$name] = microtime(true);
     }
 
-    static function endTimeMeasure($name){
+    static function endTimeMeasure($name)
+    {
         $now = microtime(true);
-        self::$timeInSeconds[$name] = $now - self::$timeMeasures[$name];
+        if (empty(self::$timeInSeconds[$name])) {
+            self::$timeInSeconds[$name] = 0;
+        }
+        self::$timeInSeconds[$name] += $now - self::$timeMeasures[$name];
 
         self::startTimeMeasure($name);
     }
 
-    static function getTimeMeasureResults(){
+    static function getTimeMeasureResults()
+    {
         return print_r(self::$timeInSeconds, true);
     }
 
-    static function log($message, $fileName = null, $logLevel = self::LOG_LEVEL_DEBUG)
+    static function log($message, $logStd = true, $logLevel = self::LOG_LEVEL_DEBUG)
     {
-        if ( ! defined('STDOUT') && $fileName == null) {
+        if ( ! defined('STDOUT') && $logStd) {
             define('STDOUT', fopen('php://stdout', 'w'));
         }
 
@@ -35,9 +41,14 @@ class Logger
             $message = json_encode($message);
         }
 
-        if(empty($fileName)){
-            $fileName = STDOUT;
+        if ($logStd) {
+            fwrite(STDOUT, date('Y-m-d H:i:s') . ' -> ' . $message . "\n");
+        } else {
+            file_put_contents(
+                '/tmp/debug.txt',
+                date('Y-m-d H:i:s', time()) . ' -> ' . $message . PHP_EOL,
+                FILE_APPEND | LOCK_EX
+            );
         }
-        fwrite($fileName, date('Y-m-d H:i:s') . ' -> ' . $message . "\n");
     }
 }
