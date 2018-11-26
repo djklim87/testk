@@ -36,7 +36,7 @@ class ManticoreHandler
     public function handleTopics()
     {
         $this->manticoreQL->setAttribute(PDO::ATTR_ERRMODE , PDO::ERRMODE_EXCEPTION);
-        
+
         Logger::log('Handler class: get messages');
         $consumer = $this->consumer->subscribe($this->config['consumer']['topic'])->getConsumer();
         Logger::log('Handler class: get messages complete');
@@ -50,8 +50,7 @@ class ManticoreHandler
             }
             json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs = "'" . str_replace(["'", '"'], ["\'", '\"'], $message->payload) . "'";
-                //$docs = $message->payload;
+                $docs = str_replace("'", "\'", $message->payload);
             } else {
                 continue;
             }
@@ -60,14 +59,14 @@ class ManticoreHandler
             // we might want to run multiple CALL PQs in parallel -  this will require forking several processes
 
             if(!empty($docs)){
-                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',(" . $docs . "), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
+                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',('" . $docs . "'), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
                 Logger::startTimeMeasure('get_manticore_result');
                 try{
                     $result = $this->manticoreQL->query($query);
                 }catch (Exception $exception){
                     Logger::log('Manticore exception: '.$exception->getMessage(), '/tmp/phpErrors.log');
-                    Logger::log($query, '/tmp/phpErrors.log');
+                    Logger::log($query, false);
                 }
 
                 Logger::endTimeMeasure('get_manticore_result');
