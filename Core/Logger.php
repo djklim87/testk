@@ -25,15 +25,19 @@ class Logger
         return print_r(self::$timeInSeconds, true);
     }
 
-    static function log($message, $logLevel = self::LOG_LEVEL_DEBUG)
+    static function log($message, $fileName = null, $logLevel = self::LOG_LEVEL_DEBUG)
     {
-        if ( ! defined('STDOUT')) {
+        if ( ! defined('STDOUT') && $fileName == null) {
             define('STDOUT', fopen('php://stdout', 'w'));
         }
 
         if (is_array($message)) {
             $message = json_encode($message);
         }
-        fwrite(STDOUT, date('Y-m-d H:i:s') . ' -> ' . $message . "\n");
+
+        if(empty($fileName)){
+            $fileName = STDOUT;
+        }
+        fwrite($fileName, date('Y-m-d H:i:s') . ' -> ' . $message . "\n");
     }
 }

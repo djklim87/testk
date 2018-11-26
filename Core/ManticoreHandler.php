@@ -49,7 +49,9 @@ class ManticoreHandler
             }
             json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs = "'" . str_replace(["'", '"'], ["\'", '\"'], $message->payload) . "'";
+                //$docs = "'" . str_replace(["'", '"'], ["\'", '\"'], $message->payload) . "'";
+
+                $docs = $message->payload;
             } else {
                 continue;
             }
@@ -61,7 +63,13 @@ class ManticoreHandler
                 $query = "CALL PQ('" . $this->config['manticore']['table'] . "',(" . $docs . "), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
                 Logger::startTimeMeasure('get_manticore_result');
-                $result = $this->manticoreQL->query($query);
+                try{
+                    $result = $this->manticoreQL->query($query);
+                }catch (Exception $exception){
+                    Logger::log('Manticore exception: '.$exception->getMessage(), '/tmp/phpErrors.log');
+                    Logger::log($query, '/tmp/phpErrors.log');
+                }
+
                 Logger::endTimeMeasure('get_manticore_result');
                 $final = [];
 
