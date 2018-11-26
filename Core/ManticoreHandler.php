@@ -22,8 +22,7 @@ class ManticoreHandler
 
         try {
             $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' .
-                                          $this->config['manticore']['port'], '', '',
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                                          $this->config['manticore']['port']);
         } catch (PDOException $e) {
 
             die("Handler class: Manticore connection error: " . $e->getMessage() . "\n");
@@ -36,6 +35,8 @@ class ManticoreHandler
      */
     public function handleTopics()
     {
+        $this->manticoreQL->setAttribute(PDO::ATTR_ERRMODE , PDO::ERRMODE_EXCEPTION);
+        
         Logger::log('Handler class: get messages');
         $consumer = $this->consumer->subscribe($this->config['consumer']['topic'])->getConsumer();
         Logger::log('Handler class: get messages complete');
