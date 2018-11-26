@@ -58,8 +58,7 @@ class ManticoreHandler
             // we might want to run multiple CALL PQs in parallel -  this will require forking several processes
 
             if(!empty($docs)){
-                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',(" . implode(",",
-                        $docs) . "), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
+                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',(" . $docs . "), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
                 Logger::startTimeMeasure('get_manticore_result');
                 $result = $this->manticoreQL->query($query);
@@ -117,7 +116,7 @@ class ManticoreHandler
                 }
                 Logger::endTimeMeasure('all_script');
             }
-            
+
             echo Logger::getTimeMeasureResults();
         }
     }
