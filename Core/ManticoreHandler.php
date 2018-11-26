@@ -49,7 +49,7 @@ class ManticoreHandler
             }
             json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs = "'" . str_replace(["'", "\""], ['\'', '"'], $message->payload) . "'";
+                $docs = "'" . str_replace(["'", '"',')','('], ["\'", '\"','\)','\('], $message->payload) . "'";
             } else {
                 continue;
             }
@@ -84,7 +84,7 @@ class ManticoreHandler
                     }
 
                 } else {
-                    Logger::log('Handler class: CALL PQ fatal error. Manticore - ' . print_r($this->manticoreQL));
+                    Logger::log('Handler class: CALL PQ fatal error. ');
                 }
 
                 if ( ! empty($sendData)) {
