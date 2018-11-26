@@ -22,7 +22,8 @@ class ManticoreHandler
 
         try {
             $this->manticoreQL = new \PDO('mysql:host=' . $this->config['manticore']['host'] . ';port=' .
-                                          $this->config['manticore']['port']);
+                                          $this->config['manticore']['port'], '', '',
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING]);
         } catch (PDOException $e) {
 
             die("Handler class: Manticore connection error: " . $e->getMessage() . "\n");
@@ -48,7 +49,7 @@ class ManticoreHandler
             }
             json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs[] = "'" . str_replace("'",'\'', $message->payload) . "'";
+                $docs[] = "'" . str_replace(["'", "\""], ['\'', '"'], $message->payload) . "'";
             } else {
                 continue;
             }
@@ -57,7 +58,7 @@ class ManticoreHandler
             // we might want to run multiple CALL PQs in parallel -  this will require forking several processes
 
             $query = "CALL PQ('" . $this->config['manticore']['table'] . "',(" . implode(",",
-                    $docs) . "), 1 as docs_json ,1 as docs,1 as query,'id' as docs_id)";
+                    $docs) . "), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
             Logger::startTimeMeasure('get_manticore_result');
             $result = $this->manticoreQL->query($query);
