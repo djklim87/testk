@@ -40,10 +40,18 @@ class ManticoreHandler
         Logger::log('Handler class: get messages');
         $consumer = $this->consumer->subscribe($this->config['consumer']['topic'])->getConsumer();
         Logger::log('Handler class: get messages complete');
+
+        $i = 0;
         while (true) {
-            Logger::startTimeMeasure('get_kafka_message');
+            $i++;
+            if ($i >= 1) {
+                Logger::startTimeMeasure('get_kafka_message');
+            }
+
             $message = $consumer->consume(120 * 1000);
-            Logger::endTimeMeasure('get_kafka_message');
+            if ($i >= 1) {
+                Logger::endTimeMeasure('get_kafka_message');
+            }
 
             if (empty($message->payload)) {
                 continue;
@@ -52,10 +60,12 @@ class ManticoreHandler
             if (json_last_error() === JSON_ERROR_NONE) {
 
                 foreach ($decoded as $k => $v) {
-                    $decoded[$k] = str_replace(["'",'"'], ["\'",''], $v);
+                    $decoded[$k] = str_replace(["'", '"'], ["\'", ''], $v);
                 }
 
                 $encoded = json_encode($decoded);
+                $encoded = str_replace("'", "\'", $encoded);
+
             } else {
                 continue;
             }
