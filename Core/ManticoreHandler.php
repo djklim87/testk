@@ -60,7 +60,7 @@ class ManticoreHandler
             if (json_last_error() === JSON_ERROR_NONE) {
 
                 foreach ($decoded as $k => $v) {
-                    $decoded[$k] = str_replace(["'", '"'], ["\'", ''], $v);
+                    $decoded[$k] = str_replace('"', "", $v);
                 }
 
                 $encoded = json_encode($decoded);
