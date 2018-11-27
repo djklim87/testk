@@ -35,7 +35,7 @@ class ManticoreHandler
      */
     public function handleTopics()
     {
-        $this->manticoreQL->setAttribute(PDO::ATTR_ERRMODE , PDO::ERRMODE_EXCEPTION);
+        $this->manticoreQL->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         Logger::log('Handler class: get messages');
         $consumer = $this->consumer->subscribe($this->config['consumer']['topic'])->getConsumer();
@@ -48,9 +48,13 @@ class ManticoreHandler
             if (empty($message->payload)) {
                 continue;
             }
-            json_decode($message->payload);
+            $decoded = json_decode($message->payload);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $docs = str_replace("'", "\'", $message->payload);
+
+                foreach ($decoded as $k => $v) {
+                    $decoded[$k] = str_replace("'", "\'", $v);
+                }
+
             } else {
                 continue;
             }
@@ -58,14 +62,14 @@ class ManticoreHandler
             // run a single PQ call
             // we might want to run multiple CALL PQs in parallel -  this will require forking several processes
 
-            if(!empty($docs)){
-                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',('" . $docs . "'), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
+            if ( ! empty($decoded)) {
+                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',('" . $decoded . "'), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
                 Logger::startTimeMeasure('get_manticore_result');
-                try{
+                try {
                     $result = $this->manticoreQL->query($query);
-                }catch (Exception $exception){
-                    Logger::log('Manticore exception: '.$exception->getMessage(), '/tmp/phpErrors.log');
+                } catch (Exception $exception) {
+                    Logger::log('Manticore exception: ' . $exception->getMessage());
                     Logger::log($query, false);
                 }
 
