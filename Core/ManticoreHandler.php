@@ -48,13 +48,14 @@ class ManticoreHandler
             if (empty($message->payload)) {
                 continue;
             }
-            $decoded = json_decode($message->payload);
+            $decoded = json_decode($message->payload, true);
             if (json_last_error() === JSON_ERROR_NONE) {
 
                 foreach ($decoded as $k => $v) {
                     $decoded[$k] = str_replace("'", "\'", $v);
                 }
 
+                $encoded = json_encode($decoded);
             } else {
                 continue;
             }
@@ -62,8 +63,8 @@ class ManticoreHandler
             // run a single PQ call
             // we might want to run multiple CALL PQs in parallel -  this will require forking several processes
 
-            if ( ! empty($decoded)) {
-                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',('" . $decoded . "'), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
+            if ( ! empty($encoded)) {
+                $query = "CALL PQ('" . $this->config['manticore']['table'] . "',('" . $encoded . "'), 1 as docs_json, 1 as docs, 1 as query, 'id' as docs_id)";
 
                 Logger::startTimeMeasure('get_manticore_result');
                 try {
