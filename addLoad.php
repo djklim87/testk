@@ -16,7 +16,7 @@ $user    = 'root';
 $pass    = 'pass';
 $charset = 'utf8';
 
-$dsn = "mysql:host=0;port=3306;dbname=$db;charset=$charset";
+$dsn = "mysql:host=0;dbname=$db;charset=$charset";
 $opt = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
