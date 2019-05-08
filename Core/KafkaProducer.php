@@ -9,8 +9,8 @@ class KafkaProducer
         Logger::log('Producer class: rdkafka init');
         $this->producer = new RdKafka\Producer();
         $this->producer->setLogLevel(LOG_DEBUG);
-        Logger::log('Producer class: add brokers - '.$config['kafka']['brokers']);
-        $this->producer->addBrokers($config['kafka']['brokers']);
+        Logger::log('Producer class: add brokers - '.getenv('KAFKA_HOST'));
+        $this->producer->addBrokers(getenv('KAFKA_HOST'));
     }
 
     public function send($topic, $message){
