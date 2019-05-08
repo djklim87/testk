@@ -11,13 +11,12 @@ $config_file = 'config_default.ini';
 $config      = parse_ini_file($config_file, true);
 
 
-$host    = getenv('MYSQL_HOST');
-$db      = 'testingdb';
+$db      = 'wordpress';
 $user    = 'root';
 $pass    = 'pass';
 $charset = 'utf8';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$dsn = "mysql:host=0;port=3306;dbname=$db;charset=$charset";
 $opt = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
