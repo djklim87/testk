@@ -11,8 +11,8 @@ $config_file = 'config_default.ini';
 $config      = parse_ini_file($config_file, true);
 
 
-$host    = 'mysql';
-$db      = 'wordpress';
+$host    = getenv('MYSQL_HOST');
+$db      = 'testingdb';
 $user    = 'root';
 $pass    = 'pass';
 $charset = 'utf8';
